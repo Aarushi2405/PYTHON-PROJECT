@@ -62,9 +62,34 @@ def signup():
 		conn.close()
 		return render_template('dashboard.html')
 	return render_template('signup.html', form=form)
+
 @app.route('/dashboard')
 def dashboard():
-	return render_template('dashboard.html')	
+	return render_template('dashboard.html')
+
+@app.route('/profile')
+def profile():
+	return render_template('profile.html')	
+
+@app.route('/leaderboard')
+def leaderboard():
+	return render_template('leaderboard.html')	
+
+@app.route('/quiz1')
+def quiz1():
+	return render_template('quiz1.html')
+
+@app.route('/quiz2')
+def quiz2():
+	return render_template('quiz2.html')	
+
+@app.route('/quiz3')
+def quiz3():
+	return render_template('quiz3.html')	
+
+@app.route('/quiz4')
+def quiz4():
+	return render_template('quiz4.html')			
 
 if __name__=='__main__':
 	app.run(debug=True)
