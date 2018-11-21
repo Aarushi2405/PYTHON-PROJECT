@@ -25,7 +25,7 @@ class ForgotPasswordForm(FlaskForm):
 		username = StringField('username')
 		security_question = StringField('(Security question) Who is your favorite cartoon character?')
 		new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
-		confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('new_password')])
+		confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('new_password', message='Field must be equal to new password.')])
 
 
 @app.route('/')
