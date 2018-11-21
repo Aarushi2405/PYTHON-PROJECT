@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request
+from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
@@ -15,15 +15,17 @@ class LoginForm(FlaskForm):
 	password = PasswordField('password')
 
 class RegisterForm(FlaskForm):
-	email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
 	username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+	email = StringField('email', validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)])
+	security_question = StringField('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)])
 	password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
 	confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('password')])
 
 class ForgotPasswordForm(FlaskForm):
 		username = StringField('username')
-		password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
-		confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('password')])
+		security_question = StringField('(Security question) Who is your favorite cartoon character?')
+		new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
+		confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('new_password')])
 
 
 @app.route('/')
@@ -34,18 +36,18 @@ def login():
 		username = form.username.data
 		password = form.password.data
 		c, conn = connection()
-		x = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username),))
-		if int(x) == 1 :
-			x = c.fetchone()
-			if str(password) == x[2] :
+		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username),))
+		if int(row) == 1 :
+			row = c.fetchone()
+			if str(password) == row[4] :
 				c.close()
 				conn.close()
-				return render_template('dashboard.html')
+				return redirect(url_for('dashboard'))
 			else :
 				flash("incorrect password...")
 				return render_template('login.html', form=form)
 		else :
-			flash("inavalid username...")
+			flash("invalid username...")
 			return render_template('login.html', form=form)
 	return render_template('login.html', form=form)
 
@@ -55,19 +57,20 @@ def signup():
 	if request.method== "POST" and form.validate_on_submit():
 		username = form.username.data
 		email = form.email.data
+		security_question = form.security_question.data
 		password = form.password.data
 		confirm_password = form.confirm_password.data
 		c, conn = connection()
-		x = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
-		if int(x) > 0:
+		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
+		if int(row) > 0:
 			flash("username already taken...please choose another...")
 			return render_template('signup.html', form=form)
 		else :
-			c.execute("INSERT INTO users (username, email, password, confirm_password) VALUES (\"%s\",\" %s\", \"%s\", \"%s\")" % (thwart(username), thwart(email), thwart(password), thwart(confirm_password)))
-		conn.commit()
-		c.close()
-		conn.close()
-		return render_template('dashboard.html')
+			c.execute("INSERT INTO users (username, email, security_question, password, confirm_password) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (thwart(username), thwart(email), thwart(security_question), thwart(password), thwart(confirm_password)))
+			conn.commit()
+			c.close()
+			conn.close()
+			return redirect(url_for('dashboard'))
 	return render_template('signup.html', form=form)
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
@@ -75,21 +78,25 @@ def forgot_password():
 	form = ForgotPasswordForm()
 	if request.method== "POST" and form.validate_on_submit():
 		username = form.username.data
-		password = form.password.data
+		security_question = form.security_question.data
+		new_password = form.new_password.data
 		confirm_password = form.confirm_password.data
 		c, conn = connection()
-		x = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
-		if int(x) > 0:
-			flash("Set new password..")
-			return render_template('forgot_password.html', form=form)
+		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
+		if int(row) == 1:
+			row = c.fetchone()
+			if str(security_question) == row[3] :
+				c.execute("UPDATE users SET password = \"%s\", confirm_password = \"%s\" WHERE username = \"%s\"" % (thwart(new_password), thwart(confirm_password), thwart(username)))
+				conn.commit()
+				c.close()
+				conn.close()
+				return redirect(url_for('login'))
+			else :
+				flash("invalid answer to security question...")
 		else :
-			c.execute("INSERT INTO users (username, email, password, confirm_password) VALUES (\"%s\",\" %s\", \"%s\", \"%s\")" % (thwart(username), thwart(email), thwart(password), thwart(confirm_password)))
-		conn.commit()
-		c.close()
-		conn.close()
-		return render_template('login.html')
+			flash("invalid username...")
+			return render_template('forgot_password.html', form=form)
 	return render_template('forgot_password.html', form=form)
-
 
 @app.route('/dashboard')
 def dashboard():
