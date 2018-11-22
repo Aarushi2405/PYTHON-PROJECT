@@ -105,24 +105,15 @@ def forgot_password():
 def dashboard():
 	return render_template('dashboard.html')
 
-@app.route('/profile')
-def profile():
-	return render_template('profile.html')
-
-@app.route('/leaderboard')
-def leaderboard():
-	return render_template('leaderboard.html')
-
 i = 0
 correct = 0 
 score = 0
-x = 0
-y = 0
+x = []
 
 @app.route('/quiz1', methods=['GET', 'POST'])
 def quiz1():
-	global i, correct, score, x, y
-	x = time.time()
+	global i, correct, score, x
+	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
 	row = c.execute("SELECT * FROM quiz1")	
@@ -142,14 +133,13 @@ def quiz1():
 			score=correct
 			i=0
 			correct=0
-			y = time.time()
 			return redirect(url_for('scorecard'))
 	return render_template('quiz1.html', form=form)
 
 @app.route('/scorecard')
 def scorecard():
 	flash("you scored %s out of 3..." % score)
-	flash("you took %s seconds to complete this quiz..." % str(y-x))
+	flash("you took %s seconds to complete this quiz..." % str(x[2]-x[0]))
 	return render_template('scorecard.html')
 
 if __name__=='__main__':
