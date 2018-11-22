@@ -109,10 +109,12 @@ i = 0
 correct = 0 
 score = 0
 x = []
+start = 0
+stop = 0
 
 @app.route('/quiz1', methods=['GET', 'POST'])
 def quiz1():
-	global i, correct, score, x
+	global i, correct, score, x, start, stop
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
@@ -131,15 +133,18 @@ def quiz1():
 			c.close()
 			conn.close()
 			score=correct
+			start=x[0]
+			stop=time.time()
 			i=0
 			correct=0
+			x=[]
 			return redirect(url_for('scorecard'))
 	return render_template('quiz1.html', form=form)
 
 @app.route('/scorecard')
 def scorecard():
 	flash("you scored %s out of 3..." % score)
-	flash("you took %s seconds to complete this quiz..." % str(x[2]-x[0]))
+	flash("you took %s seconds to complete this quiz..." % str(stop-start))
 	return render_template('scorecard.html')
 
 if __name__=='__main__':
