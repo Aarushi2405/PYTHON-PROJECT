@@ -1,21 +1,10 @@
-<html>
-	<head>
-		<title>Doraemon Quiz</title>
-		<h1>FlaskQuiz</h1>
-		<style type="text/css">a{text-decoration:none}</style>
-	</head>
-	<body>
-		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-		<div class="w3-container">
-			<div class="w3-bar w3-white w3-border w3-border-green w3-round-large w3-large">
-				<a href="dashboard" class="w3-bar-item w3-button w3-hover-green" target="_self">Dashboard</a>
-				<a href="profile" class="w3-bar-item w3-button w3-hover-green" target="_self">Profile</a>
-				<a href="leaderboard" class="w3-bar-item w3-button w3-hover-green" target="_self">Leaderboard</a>
-				<a href="login" class="w3-bar-item w3-button w3-right w3-hover-green" target="_self">Logout</a>
-  			</div>
-		</div>
-	</body>
-</html>
+{% extends "quiz.html" %}
 
+{% block title %}
+Doraemon Quiz
+{% endblock %}
 
-
+{% block content %}
+<h2>Doraemon Quiz</h2>
+{{ super() }}
+{% endblock %}

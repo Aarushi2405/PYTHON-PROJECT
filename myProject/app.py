@@ -1,10 +1,11 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
+from wtforms import StringField, PasswordField, BooleanField, RadioField
 from wtforms.validators import InputRequired, Email, Length, EqualTo
 from dbconnect import connection
 from MySQLdb import escape_string as thwart
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ShshhhYouCannotTellAnyone'
@@ -22,11 +23,13 @@ class RegisterForm(FlaskForm):
 	confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('password')])
 
 class ForgotPasswordForm(FlaskForm):
-		username = StringField('username')
-		security_question = StringField('(Security question) Who is your favorite cartoon character?')
-		new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
-		confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('new_password', message='Field must be equal to new password.')])
+	username = StringField('username')
+	security_question = StringField('(Security question) Who is your favorite cartoon character?')
+	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
+	confirm_password = PasswordField('confirm password', validators=[InputRequired(), EqualTo('new_password', message='Field must be equal to new password.')])
 
+class QuizForm(FlaskForm):
+	quiz = RadioField(choices=[], validators=[InputRequired()])
 
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
@@ -54,7 +57,7 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
 	form = RegisterForm(request.form)
-	if request.method== "POST" and form.validate_on_submit():
+	if request.method == "POST" and form.validate_on_submit():
 		username = form.username.data
 		email = form.email.data
 		security_question = form.security_question.data
@@ -76,7 +79,7 @@ def signup():
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
 	form = ForgotPasswordForm()
-	if request.method== "POST" and form.validate_on_submit():
+	if request.method == "POST" and form.validate_on_submit():
 		username = form.username.data
 		security_question = form.security_question.data
 		new_password = form.new_password.data
@@ -110,21 +113,44 @@ def profile():
 def leaderboard():
 	return render_template('leaderboard.html')
 
-@app.route('/quiz1')
+i = 0
+correct = 0 
+score = 0
+x = 0
+y = 0
+
+@app.route('/quiz1', methods=['GET', 'POST'])
 def quiz1():
-	return render_template('quiz1.html')
+	global i, correct, score, x, y
+	x = time.time()
+	c, conn = connection()
+	form = QuizForm(request.form)
+	row = c.execute("SELECT * FROM quiz1")	
+	row = c.fetchall()
+	form.quiz.label = row[i][1]
+	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
+	answer = form.quiz.data
+	if answer == row[i][6] :
+		correct+=1
+	if request.method == "POST" and form.validate_on_submit():
+		if i<2 :
+			i+=1
+			return redirect(url_for('quiz1'))
+		else :
+			c.close()
+			conn.close()
+			score=correct
+			i=0
+			correct=0
+			y = time.time()
+			return redirect(url_for('scorecard'))
+	return render_template('quiz1.html', form=form)
 
-@app.route('/quiz2')
-def quiz2():
-	return render_template('quiz2.html')
-
-@app.route('/quiz3')
-def quiz3():
-	return render_template('quiz3.html')
-
-@app.route('/quiz4')
-def quiz4():
-	return render_template('quiz4.html')
+@app.route('/scorecard')
+def scorecard():
+	flash("you scored %s out of 3..." % score)
+	flash("you took %s seconds to complete this quiz..." % str(y-x))
+	return render_template('scorecard.html')
 
 if __name__=='__main__':
 	app.run(debug=True)
