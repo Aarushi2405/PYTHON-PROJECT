@@ -25,7 +25,7 @@ c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answ
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'What is Hattori's brother''s name?\', \'Shishimaru\', \'Kenechi\', \'Shinzo\', \'Aamara\', \'Shinzo\')")
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'Who is the female lead in the show?\', \'Umiko\', \'Sonam\', \'Suzuka\', \'Mitchiko\', \'Umiko\')")
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'Who is Kenechi''s teacher's love interest?\', \'Umiko'' Mom\', \'Kenechi''s Mom\', \'Haiko Madam\', \'Jaiko Madam\', \'Haiko Madam\')")
-c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'What colours are Hattori'clothes\', \'Blue with a yellow belt ans red sleeves'\', \'Green with a red belt and yellow sleves\', \'Red with a yellow belt and white sleeves\', \'Blue with a red belt and yellow sleeves\', \'Blue with a red belt and yellow sleeves\')")
+c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'What colours are Hattori''clothes\', \'Blue with a yellow belt ans red sleeves'\', \'Green with a red belt and yellow sleves\', \'Red with a yellow belt and white sleeves\', \'Blue with a red belt and yellow sleeves\', \'Blue with a red belt and yellow sleeves\')")
 
 
 
