@@ -133,6 +133,18 @@ def edit_profile():
 
 @app.route('/leaderboard')
 def leaderboard():
+	quizname = ['Doraemon', 'Shinchan', 'Chhota Bheem', 'Ninja Hattori' ]
+	c, conn = connection()
+	for name in quizname :
+		quiz = c.execute("SELECT * from scoreboard WHERE quizname = \'%s\' ORDER BY score DESC, timing ASC" % thwart(name)) 
+		quiz = c.fetchone()
+		while True :
+			if quiz == None :
+				break
+			flash(quiz)
+			quiz = c.fetchone()
+	c.close()
+	conn.close()
 	if 'user' in session :
 		return render_template('leaderboard.html')
 	return "YOU MUST LOGIN!"
@@ -317,3 +329,4 @@ def scorecard():
 
 if __name__=='__main__':
 	app.run(debug=True)
+
