@@ -33,6 +33,7 @@ class ForgotPasswordForm(FlaskForm):
 class QuizForm(FlaskForm):
 	quiz = RadioField(choices=[], validators=[InputRequired()])
 
+<<<<<<< HEAD
 # class EditProfileForm(FlaskForm):
 # 	name = StringField('name', validators = InputRequired())
 # 	email = StringField('email', validators = validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
@@ -41,6 +42,8 @@ class QuizForm(FlaskForm):
 # 	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
 # 	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
 
+=======
+>>>>>>> 289f832cda1f5eb3576cfdb3730e7a16132bf3e1
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -87,7 +90,7 @@ def signup():
 		else :
 			session['user']=username
 			c.execute("INSERT INTO users (name, username, email, security_question, age, password) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, \"%s\")" % (thwart(name), thwart(username), thwart(email), thwart(security_question), age, thwart(password)))
-			c.execute("CREATE TABLE %s (quizname VARCHAR(20),score INTEGER(1),timing DECIMAL(7,3))" %session['user'])
+			c.execute("CREATE TABLE %s (quizname VARCHAR(20), score INTEGER(1), timing DECIMAL(7,3))" % session['user'])
 			conn.commit()
 			c.close()
 			conn.close()
@@ -143,6 +146,18 @@ def edit_profile():
 
 @app.route('/leaderboard')
 def leaderboard():
+	quizname = ['Doraemon', 'Shinchan', 'Chhota Bheem', 'Ninja Hattori' ]
+	c, conn = connection()
+	for name in quizname :
+		quiz = c.execute("SELECT * from scoreboard WHERE quizname = \'%s\' ORDER BY score DESC, timing ASC" % thwart(name)) 
+		quiz = c.fetchone()
+		while True :
+			if quiz == None :
+				break
+			flash(quiz)
+			quiz = c.fetchone()
+	c.close()
+	conn.close()
 	if 'user' in session :
 		return render_template('leaderboard.html')
 	return "YOU MUST LOGIN!"
@@ -177,7 +192,7 @@ score = 0
 x = []
 start = 0
 stop = 0
-quizname = ''
+quizname = ""
 
 @app.route('/quiz1', methods=['GET', 'POST'])
 def quiz1():
@@ -197,18 +212,15 @@ def quiz1():
 			i += 1
 			return redirect(url_for('quiz1'))
 		else :
-
+			c.close()
+			conn.close()
 			score = correct
 			start = x[0]
 			stop = time.time()
-			quizname = 'Doraemon'
+			quizname = "Doraemon"
 			i = 0
 			correct = 0
-			c.execute("Insert into %s values(%s,%d,%.3f)" %(session['user'],thwart(quizname),score,stop-start))
-			conn.commit()
 			x = []
-			c.close()
-			conn.close()
 			return redirect(url_for('scorecard'))
 	if 'user' in session :
 		return render_template('quiz1.html', form=form)
@@ -216,7 +228,7 @@ def quiz1():
 
 @app.route('/quiz2', methods=['GET', 'POST'])
 def quiz2():
-	global i, correct, score, x, start, stop
+	global i, correct, score, x, start, stop, quizname
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
@@ -237,6 +249,7 @@ def quiz2():
 			score = correct
 			start = x[0]
 			stop = time.time()
+			quizname = "Shinchan"
 			i = 0
 			correct = 0
 			x = []
@@ -245,10 +258,13 @@ def quiz2():
 		return render_template('quiz2.html', form=form)
 	return "YOU MUST LOGIN!"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 289f832cda1f5eb3576cfdb3730e7a16132bf3e1
 @app.route('/quiz3', methods=['GET', 'POST'])
 def quiz3():
-	global i, correct, score, x, start, stop
+	global i, correct, score, x, start, stop, quizname
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
@@ -269,6 +285,7 @@ def quiz3():
 			score = correct
 			start = x[0]
 			stop = time.time()
+			quizname = "Chhota Bheem"
 			i = 0
 			correct = 0
 			x = []
@@ -279,7 +296,7 @@ def quiz3():
 
 @app.route('/quiz4', methods=['GET', 'POST'])
 def quiz4():
-	global i, correct, score, x, start, stop
+	global i, correct, score, x, start, stop, quizname
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
@@ -300,6 +317,7 @@ def quiz4():
 			score = correct
 			start = x[0]
 			stop = time.time()
+			quizname = "Ninja Hattori"
 			i = 0
 			correct = 0
 			x = []
@@ -318,6 +336,7 @@ def scorecard():
 		c.execute("UPDATE scoreboard SET score = %d, timing = %.3f WHERE username = \"%s\" AND quizname = \"%s\"" % (score, (stop - start), thwart(session.get('user')), thwart(quizname)))
 	else :
 		c.execute("INSERT INTO scoreboard (username, quizname, score, timing) VALUES (\"%s\", \"%s\", %d, %.3f)" % (thwart(session.get('user')), thwart(quizname), score, (stop - start)))
+	c.execute("INSERT INTO %s VALUES (\"%s\", %d, %.3f)" % (thwart(session.get('user')), thwart(quizname) , score, (stop-start)))
 	conn.commit()
 	c.close()
 	conn.close()
@@ -327,3 +346,4 @@ def scorecard():
 
 if __name__=='__main__':
 	app.run(debug=True)
+
