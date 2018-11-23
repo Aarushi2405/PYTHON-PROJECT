@@ -246,6 +246,9 @@ def quiz2():
 		return render_template('quiz2.html', form=form)
 	return "YOU MUST LOGIN!"
 
+
+MY NAME IS AARUSHI
+
 @app.route('/quiz3', methods=['GET', 'POST'])
 def quiz3():
 	global i, correct, score, x, start, stop
