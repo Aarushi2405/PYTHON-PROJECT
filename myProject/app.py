@@ -33,6 +33,17 @@ class ForgotPasswordForm(FlaskForm):
 class QuizForm(FlaskForm):
 	quiz = RadioField(choices=[], validators=[InputRequired()])
 
+LALALALALALALALAAL
+HELLO
+
+class EditProfileForm(FlaskForm):
+	name = StringField('name', validators = InputRequired()], default = 'Janvi Chhabra')
+	email = StringField('email', validators = validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
+	security_question = StringField(('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)], default = 'Shinchan')
+	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
+	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
+	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
+
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
