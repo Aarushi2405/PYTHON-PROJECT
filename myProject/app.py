@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, flash, request, redirect, url_for, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, RadioField, IntegerField
@@ -36,6 +36,7 @@ class QuizForm(FlaskForm):
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	session.pop('user', None)
 	form = LoginForm(request.form)
 	if request.method == "POST" and form.validate_on_submit():
 		username = form.username.data
@@ -47,6 +48,7 @@ def login():
 			if str(password) == row[6] :
 				c.close()
 				conn.close()
+				session['user'] = username
 				return redirect(url_for('dashboard'))
 			else :
 				flash("incorrect password...")
@@ -107,38 +109,55 @@ def forgot_password():
 
 @app.route('/dashboard')
 def dashboard():
-	return render_template('dashboard.html')
+	if 'user' in session :
+		return render_template('dashboard.html')
+	return "YOU MUST LOGIN!"
+
 
 @app.route('/profile')
 def profile():
 	# c.execute("Select * from users where username = %s" session['username'])
 	# x = c.fetchone()
 	# return render_template('profile.html',username=("Aarushi","lalala","5"))
-	return render_template('profile.html')
+	if 'user' in session :
+		return render_template('profile.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/edit_profile')
 def edit_profile():
-	return render_template('edit_profile.html')
+	if 'user' in session :
+		return render_template('edit_profile.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/leaderboard')
 def leaderboard():
-	return render_template('leaderboard.html')
+	if 'user' in session :
+		return render_template('leaderboard.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz1about')
 def quiz1about():
-	return render_template('quiz1about.html')	
+	if 'user' in session :
+		return render_template('quiz1about.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz2about')
 def quiz2about():
-	return render_template('quiz2about.html')	
+	if 'user' in session :
+		return render_template('quiz2about.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz3about')
 def quiz3about():
-	return render_template('quiz3about.html')	
+	if 'user' in session :
+		return render_template('quiz3about.html')
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz4about')
 def quiz4about():
-	return render_template('quiz4about.html')	
+	if 'user' in session :
+		return render_template('quiz4about.html')
+	return "YOU MUST LOGIN!"
 
 i = 0
 correct = 0 
@@ -174,8 +193,10 @@ def quiz1():
 			correct = 0
 			x = []
 			return redirect(url_for('scorecard'))
-	return render_template('quiz1.html', form=form)
-
+	if 'user' in session :
+		return render_template('quiz1.html', form=form)
+	return "YOU MUST LOGIN!"
+	
 @app.route('/quiz2', methods=['GET', 'POST'])
 def quiz2():
 	global i, correct, score, x, start, stop
@@ -203,7 +224,9 @@ def quiz2():
 			correct = 0
 			x = []
 			return redirect(url_for('scorecard'))
-	return render_template('quiz2.html', form=form)
+	if 'user' in session :
+		return render_template('quiz2.html', form=form)
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz3', methods=['GET', 'POST'])
 def quiz3():
@@ -232,7 +255,9 @@ def quiz3():
 			correct = 0
 			x = []
 			return redirect(url_for('scorecard'))
-	return render_template('quiz3.html', form=form)
+	if 'user' in session :
+		return render_template('quiz3.html', form=form)
+	return "YOU MUST LOGIN!"
 
 @app.route('/quiz4', methods=['GET', 'POST'])
 def quiz4():
@@ -261,13 +286,17 @@ def quiz4():
 			correct = 0
 			x = []
 			return redirect(url_for('scorecard'))
-	return render_template('quiz4.html', form=form)
+	if 'user' in session :
+		return render_template('quiz4.html', form=form)
+	return "YOU MUST LOGIN!"
 
 @app.route('/scorecard')
 def scorecard():
 	flash("you scored %s out of 5..." % score)
 	flash("you took %s seconds to complete this quiz..." % str(stop - start))
-	return render_template('scorecard.html')
+	if 'user' in session :
+		return render_template('scorecard.html')
+	return 
 
 if __name__=='__main__':
 	app.run(debug=True)
