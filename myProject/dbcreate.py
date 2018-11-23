@@ -1,12 +1,12 @@
 from dbconnect import connection
 
 c, conn = connection()
-c.execute("CREATE TABLE users (uid INT(10) AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30), username VARCHAR(15) UNIQUE, email VARCHAR(50), security_question VARCHAR(100), age INTEGER(2), password VARCHAR(80), confirm_password VARCHAR(80))")
+c.execute("CREATE TABLE users (uid INT(10) AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30), username VARCHAR(15) UNIQUE, email VARCHAR(50), security_question VARCHAR(100), age INTEGER(2), password VARCHAR(80)")
 c.execute("CREATE TABLE quiz1 (uid INT(10) AUTO_INCREMENT PRIMARY KEY, question VARCHAR(200), option1 VARCHAR(50), option2 VARCHAR(50),  option3 VARCHAR(50), option4 VARCHAR(50), answer VARCHAR(50))")
 c.execute("CREATE TABLE quiz2 (uid INT(10) AUTO_INCREMENT PRIMARY KEY, question VARCHAR(200), option1 VARCHAR(50), option2 VARCHAR(50),  option3 VARCHAR(50), option4 VARCHAR(50), answer VARCHAR(50))")
 c.execute("CREATE TABLE quiz3 (uid INT(10) AUTO_INCREMENT PRIMARY KEY, question VARCHAR(200), option1 VARCHAR(50), option2 VARCHAR(50),  option3 VARCHAR(50), option4 VARCHAR(50), answer VARCHAR(50))")
 c.execute("CREATE TABLE quiz4 (uid INT(10) AUTO_INCREMENT PRIMARY KEY, question VARCHAR(200), option1 VARCHAR(50), option2 VARCHAR(50),  option3 VARCHAR(50), option4 VARCHAR(50), answer VARCHAR(50))")
-c.execute("INSERT INTO quiz1 (question, option1, option2, option3, option4, answer) VALUES (\'Which of these, was the first Doreamon film?\', \'Nobita\'\'s Dorabian Nights\', \'Nobita\'\'s Little Space War\', \'Nobita\'\'s Dinosaur\', \'Nobita\'\'s Great Adventure in the South Seas\', \'Nobita\'\'s Dinosaur\')")
+c.execute("INSERT INTO quiz1 (question, option1, option2, option3, option4, answer) VALUES (\'Which of these was the first Doreamon film?\', \'Nobita\'\'s Dorabian Nights\', \'Nobita\'\'s Little Space War\', \'Nobita\'\'s Dinosaur\', \'Nobita\'\'s Great Adventure in the South Seas\', \'Nobita\'\'s Dinosaur\')")
 c.execute("INSERT INTO quiz1 (question, option1, option2, option3, option4, answer) VALUES (\'Suneo has a cat, what is it called and is it a male or a female cat?\', \'Midori, Female\',\'Mii Chan, Female\', \'Ria Chan, Female\', \'Chiruchiru, Male\', \'Chiruchiru, Male\')")
 c.execute("INSERT INTO quiz1 (question, option1, option2, option3, option4, answer) VALUES (\'Gian always picks on Nobita, who helps him with this?\', \'Doreamon', \'Suneo', \'Dekisugi', \'Sewashi', 'Suneo')")
 c.execute("INSERT INTO quiz1 (question, option1, option2, option3, option4, answer) VALUES (\'What is Nobita\'\'s special skill?\', \'His handwriting skills\', \'His sleeping skills and comic book knowledge\', \'His fighting skills\', \'His ability to run fast\', \'His sleeping skills and comic book knowledge\')")
@@ -26,16 +26,5 @@ c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answ
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'Who is the female lead in the show?\', \'Yumiko\', \'Sonam\', \'Suzuka\', \'Mitchiko\', \'Yumiko\')")
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'Who is Kenechi\'\'s teacher\'\'s love interest?\', \'Yumiko\'\' Mom\', \'Kenechi\'\'s Mom\', \'Haiko Madam\', \'Jaiko Madam\', \'Haiko Madam\')")
 c.execute("INSERT INTO quiz4 (question, option1, option2, option3, option4, answer) VALUES(\'What colours are Hattori\'\'clothes?\', \'Blue with a yellow belt and red sleeves\', \'Green with a red belt and yellow sleeves\', \'Red with a yellow belt and white sleeves\', \'Blue with a red belt and yellow sleeves\', \'Blue with a red belt and yellow sleeves\')")
+c.execute("CREATE TABLE scoreboard (username VARCHAR(15), quizname VARCHAR(20), score INTEGER(1), timing DECIMAL(10, 5))")
 conn.commit()
-
-
-
-
-
-
-
-
-
-
-
-

@@ -75,7 +75,9 @@ def signup():
 			flash("username already taken...please choose another...")
 			return render_template('signup.html', form=form)
 		else :
-			c.execute("INSERT INTO users (name, username, email, security_question, age, password, confirm_password) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, \"%s\", \"%s\")" % (thwart(name), thwart(username), thwart(email), thwart(security_question), age, thwart(password), thwart(confirm_password)))
+			session['user']=username
+			c.execute("INSERT INTO users (name, username, email, security_question, age, password) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, \"%s\")" % (thwart(name), thwart(username), thwart(email), thwart(security_question), age, thwart(password)))
+			c.execute("CREATE TABLE %s (quizname varchar(20),score int(1),time decimal(10,3))" %session['user'])
 			conn.commit()
 			c.close()
 			conn.close()
@@ -94,8 +96,8 @@ def forgot_password():
 		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
 		if int(row) == 1:
 			row = c.fetchone()
-			if str(security_question) == row[5] :
-				c.execute("UPDATE users SET password = \"%s\", confirm_password = \"%s\" WHERE username = \"%s\"" % (thwart(new_password), thwart(confirm_password), thwart(username)))
+			if str(security_question) == row[4] :
+				c.execute("UPDATE users SET password = \"%s\" WHERE username = \"%s\"" % (thwart(new_password), thwart(username)))
 				conn.commit()
 				c.close()
 				conn.close()
@@ -160,7 +162,7 @@ def quiz4about():
 	return "YOU MUST LOGIN!"
 
 i = 0
-correct = 0 
+correct = 0
 score = 0
 x = []
 start = 0
@@ -172,7 +174,7 @@ def quiz1():
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz1")	
+	row = c.execute("SELECT * FROM quiz1")
 	row = c.fetchall()
 	form.quiz.label = row[i][1]
 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
@@ -196,14 +198,14 @@ def quiz1():
 	if 'user' in session :
 		return render_template('quiz1.html', form=form)
 	return "YOU MUST LOGIN!"
-	
+
 @app.route('/quiz2', methods=['GET', 'POST'])
 def quiz2():
 	global i, correct, score, x, start, stop
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz2")	
+	row = c.execute("SELECT * FROM quiz2")
 	row = c.fetchall()
 	form.quiz.label = row[i][1]
 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
@@ -234,7 +236,7 @@ def quiz3():
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz3")	
+	row = c.execute("SELECT * FROM quiz3")
 	row = c.fetchall()
 	form.quiz.label = row[i][1]
 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
@@ -265,7 +267,7 @@ def quiz4():
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz4")	
+	row = c.execute("SELECT * FROM quiz4")
 	row = c.fetchall()
 	form.quiz.label = row[i][1]
 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
@@ -294,9 +296,18 @@ def quiz4():
 def scorecard():
 	flash("you scored %s out of 5..." % score)
 	flash("you took %s seconds to complete this quiz..." % str(stop - start))
+	c, conn = connection()
+	row = c.execute("SELECT * FROM scoreboard WHERE username = \"%s\" AND quizname = \"%s\"" % (thwart(session.get('user')), thwart(quizname)))
+	if int(row) > 0:
+		c.execute("UPDATE scoreboard SET score = %d, timing = %.5f WHERE username = \"%s\" AND quizname = \"%s\"" % (score, (stop - start), thwart(session.get('user')), thwart(quizname)))
+	else :
+		c.execute("INSERT INTO scoreboard (username, quizname, score, timing) VALUES (\"%s\", \"%s\", %d, %.5f)" % (thwart(session.get('user')), thwart(quizname), score, (stop - start)))
+	conn.commit()
+	c.close()
+	conn.close()
 	if 'user' in session :
 		return render_template('scorecard.html')
-	return 
+	return
 
 if __name__=='__main__':
 	app.run(debug=True)
