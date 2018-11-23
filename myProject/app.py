@@ -77,7 +77,7 @@ def signup():
 		else :
 			session['user']=username
 			c.execute("INSERT INTO users (name, username, email, security_question, age, password) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, \"%s\")" % (thwart(name), thwart(username), thwart(email), thwart(security_question), age, thwart(password)))
-			c.execute("CREATE TABLE %s (quizname varchar(20),score int(1),time decimal(10,3))" %session['user'])
+			c.execute("CREATE TABLE %s (quizname VARCHAR(20),score INTEGER(1),timing DECIMAL(7,3))" %session['user'])
 			conn.commit()
 			c.close()
 			conn.close()
@@ -167,10 +167,11 @@ score = 0
 x = []
 start = 0
 stop = 0
+quizname = ''
 
 @app.route('/quiz1', methods=['GET', 'POST'])
 def quiz1():
-	global i, correct, score, x, start, stop
+	global i, correct, score, x, start, stop, quizname
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
@@ -186,14 +187,18 @@ def quiz1():
 			i += 1
 			return redirect(url_for('quiz1'))
 		else :
-			c.close()
-			conn.close()
+
 			score = correct
 			start = x[0]
 			stop = time.time()
+			quizname = 'Doraemon'
 			i = 0
 			correct = 0
+			c.execute("Insert into %s values(%s,%d,%.3f)" %(session['user'],thwart(quizname),score,stop-start))
+			conn.commit()
 			x = []
+			c.close()
+			conn.close()
 			return redirect(url_for('scorecard'))
 	if 'user' in session :
 		return render_template('quiz1.html', form=form)
@@ -299,9 +304,9 @@ def scorecard():
 	c, conn = connection()
 	row = c.execute("SELECT * FROM scoreboard WHERE username = \"%s\" AND quizname = \"%s\"" % (thwart(session.get('user')), thwart(quizname)))
 	if int(row) > 0:
-		c.execute("UPDATE scoreboard SET score = %d, timing = %.5f WHERE username = \"%s\" AND quizname = \"%s\"" % (score, (stop - start), thwart(session.get('user')), thwart(quizname)))
+		c.execute("UPDATE scoreboard SET score = %d, timing = %.3f WHERE username = \"%s\" AND quizname = \"%s\"" % (score, (stop - start), thwart(session.get('user')), thwart(quizname)))
 	else :
-		c.execute("INSERT INTO scoreboard (username, quizname, score, timing) VALUES (\"%s\", \"%s\", %d, %.5f)" % (thwart(session.get('user')), thwart(quizname), score, (stop - start)))
+		c.execute("INSERT INTO scoreboard (username, quizname, score, timing) VALUES (\"%s\", \"%s\", %d, %.3f)" % (thwart(session.get('user')), thwart(quizname), score, (stop - start)))
 	conn.commit()
 	c.close()
 	conn.close()
