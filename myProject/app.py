@@ -33,16 +33,13 @@ class ForgotPasswordForm(FlaskForm):
 class QuizForm(FlaskForm):
 	quiz = RadioField(choices=[], validators=[InputRequired()])
 
-LALALALALALALALAAL
-HELLO
-
-class EditProfileForm(FlaskForm):
-	name = StringField('name', validators = InputRequired()], default = 'Janvi Chhabra')
-	email = StringField('email', validators = validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
-	security_question = StringField(('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)], default = 'Shinchan')
-	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
-	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
-	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
+# class EditProfileForm(FlaskForm):
+# 	name = StringField('name', validators = InputRequired())
+# 	email = StringField('email', validators = validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
+# 	security_question = StringField(('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)], default = 'Shinchan')
+# 	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
+# 	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
+# 	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
 
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
@@ -50,8 +47,10 @@ def login():
 	session.pop('user', None)
 	form = LoginForm(request.form)
 	if request.method == "POST" and form.validate_on_submit():
+		form.username.default="Aarushi"
 		username = form.username.data
 		password = form.password.data
+
 		c, conn = connection()
 		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username),))
 		if int(row) == 1 :
@@ -246,8 +245,6 @@ def quiz2():
 		return render_template('quiz2.html', form=form)
 	return "YOU MUST LOGIN!"
 
-
-MY NAME IS AARUSHI
 
 @app.route('/quiz3', methods=['GET', 'POST'])
 def quiz3():
