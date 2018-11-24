@@ -173,22 +173,6 @@ def leaderboard():
 		quiz = c.execute("SELECT * from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
 		data = c.fetchall()
 		m[name]=data
-	#print(m)
-
-	# for s in m:
-	# 	print "*", s
-	#
-	# 	for a in m[s]:
-	# 		for row in a:
-	# 			print(row)
-
-	# quiz = c.fetchone()
-	# flash("%s %s %s %s" %(data[0][0],data[0][1],data[0][2],data[0][3]))
-		# while True :
-		# 	if quiz == None :
-		# 		break
-		# 	flash(quiz)
-		# 	quiz = c.fetchone()
 	c.close()
 	conn.close()
 	if 'user' in session :
