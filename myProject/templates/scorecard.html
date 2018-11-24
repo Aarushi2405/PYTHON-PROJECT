@@ -16,15 +16,15 @@
   			<br><br><br>
   			{% with messages = get_flashed_messages() %}
     		{% if messages %}
-        		{% for message in messages %}
-        		    {{message}}
+					<script>
+	 					var messages = {{ messages | safe }};
+	 					for (var i=0; i<messages.length; i++) {
+		 				alert(messages[i]);
+	 					}
+ 					</script>
         		    <br>
-    	    	{% endfor %}
-    		{% endif %}
+    	    {% endif %}
 		{% endwith %}
 		</div>
 	</body>
 </html>
-
-
-

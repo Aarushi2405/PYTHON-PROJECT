@@ -128,8 +128,18 @@ def dashboard():
 
 @app.route('/profile')
 def profile():
+	c, conn = connection()
+	c.execute("SELECT * from users where username = \"%s\" " % thwart(session.get('user')))
+	row = c.fetchone()
+	about_me = [row[1], row[2], row[3], row[5], row[4]]
+	c.execute("SELECT * from %s" % session.get('user'))
+	rows = c.fetchall()
+	print rows
+	conn.commit()
+	c.close()
+	conn.close()
 	if 'user' in session :
-		return render_template('profile.html')
+		return render_template('profile.html', about_me=about_me, rows = rows)
 	return "YOU MUST LOGIN!"
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -176,7 +186,7 @@ def leaderboard():
 	c.close()
 	conn.close()
 	if 'user' in session :
-		return render_template('leaderboard.html', m = m, quizname = quizname)
+		return render_template('leaderboard.html', m = m)
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz1about')

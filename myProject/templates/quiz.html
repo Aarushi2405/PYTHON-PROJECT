@@ -4,9 +4,12 @@
 {% block content %}
 	{% with messages = get_flashed_messages() %}
     	{% if messages %}
-        	{% for message in messages %}
-        	    <i>{{message}}</i>
-    	    {% endfor %}
+				<script>
+ 					var messages = {{ messages | safe }};
+ 					for (var i=0; i<messages.length; i++) {
+	 				alert(messages[i]);
+ 					}
+				</script>
     	{% endif %}
 	{% endwith %}
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -20,9 +23,9 @@
 	</div>
 	<div class="container">
 		<form class="form-signin" method="POST" action="/quiz1">
-			<br><br><br> 
+			<br><br><br>
 			{{ form.hidden_tag() }}
-			{{ form.quiz.label }} 
+			{{ form.quiz.label }}
 			<br>
 			{{ wtf.form_field(form.quiz) }}
 			<br>
