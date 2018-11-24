@@ -8,9 +8,12 @@ Edit Profile
 {% block content %}
 	{% with messages = get_flashed_messages() %}
     	{% if messages %}
-        	{% for message in messages %}
-        	    <i>{{message}}</i>
-    	    {% endfor %}
+        <script>
+ 					var messages = {{ messages | safe }};
+ 					for (var i=0; i<messages.length; i++) {
+	 				alert(messages[i]);
+ 					}
+			 </script>
     	{% endif %}
 	{% endwith %}
 	<h2>Edit Profile</h2>

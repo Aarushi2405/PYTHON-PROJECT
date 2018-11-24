@@ -128,8 +128,18 @@ def dashboard():
 
 @app.route('/profile')
 def profile():
+	c, conn = connection()
+	c.execute("SELECT * from users where username = \"%s\" " % thwart(session.get('user')))
+	row = c.fetchone()
+	about_me = [row[1], row[2], row[3], row[5], row[4]]
+	c.execute("SELECT * from %s" % session.get('user'))
+	rows = c.fetchall()
+	print rows
+	conn.commit()
+	c.close()
+	conn.close()
 	if 'user' in session :
-		return render_template('profile.html')
+		return render_template('profile.html', about_me=about_me, rows = rows)
 	return "YOU MUST LOGIN!"
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -173,26 +183,10 @@ def leaderboard():
 		quiz = c.execute("SELECT * from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
 		data = c.fetchall()
 		m[name]=data
-	#print(m)
-
-	# for s in m:
-	# 	print "*", s
-	#
-	# 	for a in m[s]:
-	# 		for row in a:
-	# 			print(row)
-
-	# quiz = c.fetchone()
-	# flash("%s %s %s %s" %(data[0][0],data[0][1],data[0][2],data[0][3]))
-		# while True :
-		# 	if quiz == None :
-		# 		break
-		# 	flash(quiz)
-		# 	quiz = c.fetchone()
 	c.close()
 	conn.close()
 	if 'user' in session :
-		return render_template('leaderboard.html', m = m, quizname = quizname)
+		return render_template('leaderboard.html', m = m)
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz1about')

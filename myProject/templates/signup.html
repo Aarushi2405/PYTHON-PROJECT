@@ -14,15 +14,13 @@ Sign Up
 {% block content %}
 	{% with messages = get_flashed_messages() %}
     	{% if messages %}
-        	<!-- {% for message in messages %} -->
 					<script>
-		 var messages = {{ messages | safe }};
-		 for (var i=0; i<messages.length; i++) {
-			 alert(messages[i]);
-		 }
-	 </script>
-        	    <!-- <i>{{message}}</i> -->
-    	    <!-- {% endfor %} -->
+		 				var messages = {{ messages | safe }};
+		 				for (var i=0; i<messages.length; i++) {
+			 			alert(messages[i]);
+		 				}
+	 				</script>
+
     	{% endif %}
 	{% endwith %}
 	<div class="container">

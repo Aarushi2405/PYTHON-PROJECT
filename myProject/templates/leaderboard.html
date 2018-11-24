@@ -15,52 +15,32 @@
   			</div>
 		</div>
         <br><br><br>
+				<style>
+				table {
+						font-family: arial, sans-serif;
+						border-collapse: collapse;
+						width: 100%;
+				}
+				td, th {
+						border: 1px solid #dddddd;
+						text-align: left;
+						padding: 10px;
+				}
+				tr:nth-child(even) {
+						background-color: #dddddd;
+				}
+				</style>
 		{% for s in m %}
-		<h2> {{s}} </h2>
-		<table border="1">
+			<h3><b>&nbsp{{ s }}</b></h3>
+			<table>
 			{% for a in m[s] %}
-        	<tr>
+        <tr>
 				{% for row in a%}
-            		<td>{{ row }}</td>
+        	<td>{{ row }}</td>
 				{% endfor %}
-        	</tr>
+        </tr>
 			{% endfor %}
-		</table>
+			</table>
 		{% endfor %}
-        <!-- <h2>Doraemon Quiz</h2>
-        <table>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-        </table>
-        <br>
-        <h2>Shinchan Quiz</h2>
-        <table>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-        </table>
-        <br>
-        <h2>Chhota Bheem Quiz</h2>
-        <table>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-        </table>
-        <br>
-        <h2>Ninja Hattori Quiz</h2>
-        <table>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-        </table> -->
 	</body>
 </html>
