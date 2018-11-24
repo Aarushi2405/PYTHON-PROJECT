@@ -15,27 +15,18 @@
   			</div>
 		</div>
         <br><br><br>
-        {% with messages = get_flashed_messages() %}
-    	{% if messages %}
-        	{% for message in messages %}
-        	    <i>{{message}}</i>
-        	    <br>
-    	    {% endfor %}
-    	{% endif %}
-		{% endwith %}
-
 		{% for s in m %}
 		<h2> {{s}} </h2>
 		<table border="1">
 			{% for a in m[s] %}
-        <tr>
-					{% for row in a%}
-            <td>{{ row }}</td>
-						{% endfor %}
-        </tr>
+        	<tr>
+				{% for row in a%}
+            		<td>{{ row }}</td>
 				{% endfor %}
-	</table>
-	{% endfor %}
+        	</tr>
+			{% endfor %}
+		</table>
+		{% endfor %}
         <!-- <h2>Doraemon Quiz</h2>
         <table>
 			<tr>
