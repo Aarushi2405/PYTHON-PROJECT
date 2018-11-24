@@ -15,6 +15,7 @@ class LoginForm(FlaskForm):
 	username = StringField('username')
 	password = PasswordField('password')
 
+hello="aaeusshi"
 class RegisterForm(FlaskForm):
 	name = StringField('name', validators = [InputRequired()])
 	username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
@@ -33,27 +34,20 @@ class ForgotPasswordForm(FlaskForm):
 class QuizForm(FlaskForm):
 	quiz = RadioField(choices=[], validators=[InputRequired()])
 
-<<<<<<< HEAD
-# class EditProfileForm(FlaskForm):
-# 	name = StringField('name', validators = InputRequired())
-# 	email = StringField('email', validators = validators=[InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
-# 	security_question = StringField(('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)], default = 'Shinchan')
-# 	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
-# 	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
-# 	new_password = PasswordField('new password', validators=[InputRequired(), Length(min=8, max=80)])
 
-=======
->>>>>>> 289f832cda1f5eb3576cfdb3730e7a16132bf3e1
+
+
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	# nonlocal hello
 	session.pop('user', None)
 	form = LoginForm(request.form)
+	form.username.default="aaaaaa"
 	if request.method == "POST" and form.validate_on_submit():
-		form.username.default="Aarushi"
+
 		username = form.username.data
 		password = form.password.data
-
 		c, conn = connection()
 		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username),))
 		if int(row) == 1 :
@@ -62,14 +56,28 @@ def login():
 				c.close()
 				conn.close()
 				session['user'] = username
+				hello = username
 				return redirect(url_for('dashboard'))
 			else :
-				flash("incorrect password...")
+				flash("Incorrect Password!")
 				return render_template('login.html', form=form)
 		else :
-			flash("invalid username...")
+			flash("Invalid Username!")
 			return render_template('login.html', form=form)
 	return render_template('login.html', form=form)
+
+class EditProfileForm(FlaskForm):
+
+	# def hii():
+	# 	return session['user']
+	global hello
+	# hello = session['user']
+	name = StringField('name', validators = [InputRequired()], default=hello)
+	email = StringField('email', validators = [InputRequired(), Email(message='Invalid email.'), Length(max=50)], default = 'janvi7109@gmail.com')
+	security_question = StringField('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)], default = 'Shinchan')
+	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
+	password = PasswordField('current password')
+	new_password = PasswordField('new password')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -85,7 +93,7 @@ def signup():
 		c, conn = connection()
 		row = c.execute("SELECT * FROM users WHERE username = \"%s\"" % (thwart(username)))
 		if int(row) > 0:
-			flash("username already taken...please choose another...")
+			flash("Username already taken, Please choose another!")
 			return render_template('signup.html', form=form)
 		else :
 			session['user']=username
@@ -116,9 +124,9 @@ def forgot_password():
 				conn.close()
 				return redirect(url_for('login'))
 			else :
-				flash("invalid answer to security question...")
+				flash("Invalid answer to security question!")
 		else :
-			flash("invalid username...")
+			flash("Invalid username!")
 			return render_template('forgot_password.html', form=form)
 	return render_template('forgot_password.html', form=form)
 
@@ -140,26 +148,63 @@ def profile():
 
 @app.route('/edit_profile')
 def edit_profile():
+	# global hello
+	form = EditProfileForm(request.form)
+	if request.method == "POST" and form.validate_on_submit():
+		# form = EditProfileForm(name="hi")
+		name = form.name.data
+		email = form.email.data
+		security_question = form.security_question.data
+		age = form.age.data
+		password = form.password.data
+		new_password = form.new_password.data
+		c, conn = connection()
+		c.execute("SELECT password from users where username =\"janu\"")
+		x = c.fetchone()
+
+		c.execute("UPDATE users SET name = \"%s\", email = \"%s\", security_question = \"%s\", age = %s WHERE username = 'janu'" % (thwart(name), thwart(email), thwart(security_question), age))
+		if (password!=None and password==x[0]):
+			if (len(new_password)>7 and len(new_password)<=80):
+				c.execute("UPDATE users SET password= \"%s\" WHERE username = \"janu\"" %thwart(new_password))
+			else:
+				flash('New Password should be between 8 and 80')
+		conn.commit()
+		c.close()
+		conn.close()
+		return redirect(url_for('profile'))
 	if 'user' in session :
-		return render_template('edit_profile.html')
+		return render_template('edit_profile.html', form=form)
 	return "YOU MUST LOGIN!"
 
 @app.route('/leaderboard')
 def leaderboard():
 	quizname = ['Doraemon', 'Shinchan', 'Chhota Bheem', 'Ninja Hattori' ]
 	c, conn = connection()
+	m = {}
 	for name in quizname :
-		quiz = c.execute("SELECT * from scoreboard WHERE quizname = \'%s\' ORDER BY score DESC, timing ASC" % thwart(name)) 
-		quiz = c.fetchone()
-		while True :
-			if quiz == None :
-				break
-			flash(quiz)
-			quiz = c.fetchone()
+		quiz = c.execute("SELECT * from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
+		data = c.fetchall()
+		m[name]=data
+	# print(m)
+
+	# for s in m:
+	# 	print "*", s
+	#
+	# 	for a in m[s]:
+	# 		for row in a:
+	# 			print(row)
+
+	# quiz = c.fetchone()
+	# flash("%s %s %s %s" %(data[0][0],data[0][1],data[0][2],data[0][3]))
+		# while True :
+		# 	if quiz == None :
+		# 		break
+		# 	flash(quiz)
+		# 	quiz = c.fetchone()
 	c.close()
 	conn.close()
 	if 'user' in session :
-		return render_template('leaderboard.html')
+		return render_template('leaderboard.html', m = m, quizname = quizname)
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz1about')
@@ -258,10 +303,7 @@ def quiz2():
 		return render_template('quiz2.html', form=form)
 	return "YOU MUST LOGIN!"
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 289f832cda1f5eb3576cfdb3730e7a16132bf3e1
 @app.route('/quiz3', methods=['GET', 'POST'])
 def quiz3():
 	global i, correct, score, x, start, stop, quizname
@@ -328,8 +370,8 @@ def quiz4():
 
 @app.route('/scorecard')
 def scorecard():
-	flash("you scored %s out of 5..." % score)
-	flash("you took %s seconds to complete this quiz..." % str(stop - start))
+	flash("You scored %s out of 5!" % score)
+	flash("You took %s seconds to complete this quiz!" % str(stop - start))
 	c, conn = connection()
 	row = c.execute("SELECT * FROM scoreboard WHERE username = \"%s\" AND quizname = \"%s\"" % (thwart(session.get('user')), thwart(quizname)))
 	if int(row) > 0:
@@ -346,4 +388,3 @@ def scorecard():
 
 if __name__=='__main__':
 	app.run(debug=True)
-
