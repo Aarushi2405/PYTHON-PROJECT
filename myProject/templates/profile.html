@@ -11,12 +11,13 @@
 				<a href="dashboard" class="w3-bar-item w3-button w3-hover-green" target="_self">Dashboard</a>
 				<a href="profile" class="w3-bar-item w3-button w3-hover-green" target="_self">Profile</a>
 				<a href="leaderboard" class="w3-bar-item w3-button w3-hover-green" target="_self">Leaderboard</a>
+				<a href="leaderboard2" class="w3-bar-item w3-button w3-hover-green" target="_self">Overall Leaderboard</a>
 				<a href="login" class="w3-bar-item w3-button w3-right w3-hover-green" target="_self">Logout</a>
   			</div>
   			<br>
   			<a href="edit_profile" class="w3-button w3-right w3-green w3-hover-green w3-round-large w3-large" target="_self">Edit profile</a>
 		</div>
-		<h3><i>&nbspAbout me...</i><h3>
+		<h3><i>&nbspAbout me</i><h3>
       <br>
       <style>
       table {
@@ -54,9 +55,17 @@
 					<td><b>Favorite cartoon character</b></td>
 					<td>{{ about_me[4] }}</td>
 				</tr>
+				<tr>
+					<td><b>Rank</b></td>
+					<td>{{ about_me[5] }}</td>
+				</tr>
+				<tr>
+					<td><b>Number of Quizzes attempted</b></td>
+					<td>{{ about_me[6] }}</td>
+				</tr>
       </table>
 			<br><br>
-    <h3><i>&nbspCurrent Status...</i></h3>
+    <h3><i>&nbspCurrent Status</i></h3>
 			<br>
 			<style>
     	table {

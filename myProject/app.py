@@ -38,9 +38,10 @@ class EditProfileForm(FlaskForm) :
 	email = StringField('email', validators = [InputRequired(), Email(message='Invalid email.'), Length(max=50)])
 	security_question = StringField('(Security question) Who is your favorite cartoon character?', validators=[InputRequired(), Length(max=100)])
 	age = IntegerField('age', validators=[InputRequired(), NumberRange(min=7, max=77, message='Age must be between 7 to 77 years.')])
-	password = PasswordField('current password', validators=[InputRequired(), Length(min=8, max=80)])
+	password = PasswordField('current password')
 	new_password = PasswordField('new password(optional)')
 
+quizn={'quiz1':'Doraemon','quiz2':'Shinchan', 'quiz3':'Chhota Bheem','quiz4':'Ninja Hattori'}
 
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
@@ -134,7 +135,21 @@ def profile():
 	about_me = [row[1], row[2], row[3], row[5], row[4]]
 	c.execute("SELECT * from %s" % session.get('user'))
 	rows = c.fetchall()
-	print rows
+	# c.execute("select sum(score) from scoreboard where username =\"%s\" group by username" %session['user'])
+	# about_me.append(c.fetchone()[0])
+	c.execute("select username, sum(score),sum(timing) from scoreboard group by username order by sum(score) desc, sum(timing) asc")
+	rank=c.fetchone()
+	i = 0
+	while rank is not None:
+		i +=1
+		if (rank[0]==session['user']):
+			about_me.append(i)
+		rank=c.fetchone()
+
+	c.execute("select count(*) from %s" %session['user'])
+	about_me.append(c.fetchone()[0])
+	# about_me=about_me.(tscore,quizattempted)
+	# print rows
 	conn.commit()
 	c.close()
 	conn.close()
@@ -155,7 +170,7 @@ def edit_profile():
 		age = form.age.data
 		password = form.password.data
 		new_password = form.new_password.data
-		if str(password) == row[6] :
+		if (str(password) == row[6] or str(password)=='') :
 			c.execute("UPDATE users SET name = \"%s\", email = \"%s\", security_question = \"%s\", age = %s WHERE username = \"%s\"" % (thwart(name), thwart(email), thwart(security_question), age, thwart(session.get('user'))))
 			if new_password != '' :
 				if len(new_password)>=8 and len(new_password)<=80 :
@@ -180,36 +195,56 @@ def leaderboard():
 	c, conn = connection()
 	m = {}
 	for name in quizname :
-		quiz = c.execute("SELECT * from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
+		quiz = c.execute("SELECT username,score,timing from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
 		data = c.fetchall()
 		m[name]=data
 	c.close()
 	conn.close()
 	if 'user' in session :
-		return render_template('leaderboard.html', m = m)
+		return render_template('leaderboard.html', m = m, column=['Rank','Username','Score','Time'])
 	return "YOU MUST LOGIN!"
+
+@app.route('/leaderboard2')
+def leaderboard2():
+	# quizname = ['Doraemon', 'Shinchan', 'Chhota Bheem', 'Ninja Hattori' ]
+	c, conn = connection()
+	# m = {}
+	c.execute("select username, sum(score),sum(timing) from scoreboard group by username order by sum(score) desc, sum(timing) asc")
+	# quiz = c.execute("SELECT * from scoreboard where quizname = \'%s\' ORDER BY score DESC, timing ASC" %thwart(name))
+	data = c.fetchall()
+	# m[name]=data
+	c.close()
+	conn.close()
+	if 'user' in session :
+		return render_template('leaderboard2.html', data=data, len=len(data))
+	return "YOU MUST LOGIN!"
+
 
 @app.route('/quiz1about')
 def quiz1about():
 	if 'user' in session :
+		session['quiz']="quiz1"
 		return render_template('quiz1about.html')
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz2about')
 def quiz2about():
 	if 'user' in session :
+		session['quiz']="quiz2"
 		return render_template('quiz2about.html')
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz3about')
 def quiz3about():
 	if 'user' in session :
+		session['quiz']="quiz3"
 		return render_template('quiz3about.html')
 	return "YOU MUST LOGIN!"
 
 @app.route('/quiz4about')
 def quiz4about():
 	if 'user' in session :
+		session['quiz']="quiz4"
 		return render_template('quiz4about.html')
 	return "YOU MUST LOGIN!"
 
@@ -227,7 +262,7 @@ def quiz1():
 	x.append(time.time())
 	c, conn = connection()
 	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz1")
+	row = c.execute("SELECT * FROM %s" %session['quiz'])
 	row = c.fetchall()
 	form.quiz.label = row[i][1]
 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
@@ -244,112 +279,112 @@ def quiz1():
 			score = correct
 			start = x[0]
 			stop = time.time()
-			quizname = "Doraemon"
+			quizname = quizn[session['quiz']]
 			i = 0
 			correct = 0
 			x = []
 			return redirect(url_for('scorecard'))
 	if 'user' in session :
-		return render_template('quiz1.html', form=form)
+		return render_template('quiz1.html', form=form,quizname=quizn[session['quiz']])
 	return "YOU MUST LOGIN!"
-
-@app.route('/quiz2', methods=['GET', 'POST'])
-def quiz2():
-	global i, correct, score, x, start, stop, quizname
-	x.append(time.time())
-	c, conn = connection()
-	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz2")
-	row = c.fetchall()
-	form.quiz.label = row[i][1]
-	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
-	answer = form.quiz.data
-	if answer == row[i][6] :
-		correct += 1
-	if request.method == "POST" and form.validate_on_submit():
-		if i < 4 :
-			i += 1
-			return redirect(url_for('quiz2'))
-		else :
-			c.close()
-			conn.close()
-			score = correct
-			start = x[0]
-			stop = time.time()
-			quizname = "Shinchan"
-			i = 0
-			correct = 0
-			x = []
-			return redirect(url_for('scorecard'))
-	if 'user' in session :
-		return render_template('quiz2.html', form=form)
-	return "YOU MUST LOGIN!"
-
-
-@app.route('/quiz3', methods=['GET', 'POST'])
-def quiz3():
-	global i, correct, score, x, start, stop, quizname
-	x.append(time.time())
-	c, conn = connection()
-	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz3")
-	row = c.fetchall()
-	form.quiz.label = row[i][1]
-	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
-	answer = form.quiz.data
-	if answer == row[i][6] :
-		correct += 1
-	if request.method == "POST" and form.validate_on_submit():
-		if i < 4 :
-			i += 1
-			return redirect(url_for('quiz3'))
-		else :
-			c.close()
-			conn.close()
-			score = correct
-			start = x[0]
-			stop = time.time()
-			quizname = "Chhota Bheem"
-			i = 0
-			correct = 0
-			x = []
-			return redirect(url_for('scorecard'))
-	if 'user' in session :
-		return render_template('quiz3.html', form=form)
-	return "YOU MUST LOGIN!"
-
-@app.route('/quiz4', methods=['GET', 'POST'])
-def quiz4():
-	global i, correct, score, x, start, stop, quizname
-	x.append(time.time())
-	c, conn = connection()
-	form = QuizForm(request.form)
-	row = c.execute("SELECT * FROM quiz4")
-	row = c.fetchall()
-	form.quiz.label = row[i][1]
-	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
-	answer = form.quiz.data
-	if answer == row[i][6] :
-		correct += 1
-	if request.method == "POST" and form.validate_on_submit():
-		if i < 4 :
-			i += 1
-			return redirect(url_for('quiz4'))
-		else :
-			c.close()
-			conn.close()
-			score = correct
-			start = x[0]
-			stop = time.time()
-			quizname = "Ninja Hattori"
-			i = 0
-			correct = 0
-			x = []
-			return redirect(url_for('scorecard'))
-	if 'user' in session :
-		return render_template('quiz4.html', form=form)
-	return "YOU MUST LOGIN!"
-
+#
+# @app.route('/quiz2', methods=['GET', 'POST'])
+# def quiz2():
+# 	global i, correct, score, x, start, stop, quizname
+# 	x.append(time.time())
+# 	c, conn = connection()
+# 	form = QuizForm(request.form)
+# 	row = c.execute("SELECT * FROM quiz2")
+# 	row = c.fetchall()
+# 	form.quiz.label = row[i][1]
+# 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
+# 	answer = form.quiz.data
+# 	if answer == row[i][6] :
+# 		correct += 1
+# 	if request.method == "POST" and form.validate_on_submit():
+# 		if i < 4 :
+# 			i += 1
+# 			return redirect(url_for('quiz2'))
+# 		else :
+# 			c.close()
+# 			conn.close()
+# 			score = correct
+# 			start = x[0]
+# 			stop = time.time()
+# 			quizname = "Shinchan"
+# 			i = 0
+# 			correct = 0
+# 			x = []
+# 			return redirect(url_for('scorecard'))
+# 	if 'user' in session :
+# 		return render_template('quiz2.html', form=form)
+# 	return "YOU MUST LOGIN!"
+#
+#
+# @app.route('/quiz3', methods=['GET', 'POST'])
+# def quiz3():
+# 	global i, correct, score, x, start, stop, quizname
+# 	x.append(time.time())
+# 	c, conn = connection()
+# 	form = QuizForm(request.form)
+# 	row = c.execute("SELECT * FROM quiz3")
+# 	row = c.fetchall()
+# 	form.quiz.label = row[i][1]
+# 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
+# 	answer = form.quiz.data
+# 	if answer == row[i][6] :
+# 		correct += 1
+# 	if request.method == "POST" and form.validate_on_submit():
+# 		if i < 4 :
+# 			i += 1
+# 			return redirect(url_for('quiz3'))
+# 		else :
+# 			c.close()
+# 			conn.close()
+# 			score = correct
+# 			start = x[0]
+# 			stop = time.time()
+# 			quizname = "Chhota Bheem"
+# 			i = 0
+# 			correct = 0
+# 			x = []
+# 			return redirect(url_for('scorecard'))
+# 	if 'user' in session :
+# 		return render_template('quiz3.html', form=form)
+# 	return "YOU MUST LOGIN!"
+#
+# @app.route('/quiz4', methods=['GET', 'POST'])
+# def quiz4():
+# 	global i, correct, score, x, start, stop, quizname
+# 	x.append(time.time())
+# 	c, conn = connection()
+# 	form = QuizForm(request.form)
+# 	row = c.execute("SELECT * FROM quiz4")
+# 	row = c.fetchall()
+# 	form.quiz.label = row[i][1]
+# 	form.quiz.choices = [(row[i][j], row[i][j]) for j in range(2, 6)]
+# 	answer = form.quiz.data
+# 	if answer == row[i][6] :
+# 		correct += 1
+# 	if request.method == "POST" and form.validate_on_submit():
+# 		if i < 4 :
+# 			i += 1
+# 			return redirect(url_for('quiz4'))
+# 		else :
+# 			c.close()
+# 			conn.close()
+# 			score = correct
+# 			start = x[0]
+# 			stop = time.time()
+# 			quizname = "Ninja Hattori"
+# 			i = 0
+# 			correct = 0
+# 			x = []
+# 			return redirect(url_for('scorecard'))
+# 	if 'user' in session :
+# 		return render_template('quiz4.html', form=form)
+# 	return "YOU MUST LOGIN!"
+#
 @app.route('/scorecard')
 def scorecard():
 	flash("You scored %s out of 5!" % score)
